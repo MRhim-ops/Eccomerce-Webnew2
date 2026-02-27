@@ -22,64 +22,60 @@ namespace Eccomerce_Web.Controllers
         [HttpPost("Register")]
         public async Task<IActionResult> AddUser(RegisterDto user)
         {
-            if (user == null)
-            {
-                return BadRequest("Invalid user data.");
-            }
-
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            if (await _db.Users.AnyAsync(u => u.Email == user.Email))
+                return BadRequest("Email already exists");
+
             var hashPassword = BCrypt.Net.BCrypt.HashPassword(user.Password);
 
-
-            User newUser = new()
+            var newUser = new User
             {
                 Email = user.Email,
                 HashedPassword = hashPassword
             };
 
-
-
-
-           
             await _db.Users.AddAsync(newUser);
-            UserProfile newUserProfile = new()
-            {
-                UserId = newUser.Id,
-                Email = newUser.Email,
-                User = newUser
-            };
-            await _db.UserProfiles.AddAsync(newUserProfile);
             await _db.SaveChangesAsync();
-            return Ok("success");
+
+            var userDto = new UserDto
+            {
+                Email = newUser.Email
+            };
+
+            return Ok(userDto);
         }
+
 
 
         [HttpPost("Login")]
         public async Task<IActionResult> Login(LoginDto login)
         {
-            if (login == null)
-            {
-                return BadRequest("Invalid login data.");
-            }
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == login.Email);
+            var user = await _db.Users
+                .Include(u => u.UserProfile)
+                .FirstOrDefaultAsync(u => u.Email == login.Email);
 
             if (user == null)
-            {
-                return NotFound("User not found.");
-            }
+                return NotFound("User not found");
 
             if (!BCrypt.Net.BCrypt.Verify(login.Password, user.HashedPassword))
+                return BadRequest("Invalid password");
+
+            var userDto = new UserDto
             {
-                return BadRequest("Invalid password.");
-            }
+                Id = user.Id,
+                Email = user.Email,
+                FullName = user.UserProfile?.FullName,
+                PhoneNumber = user.UserProfile?.PhoneNumber
+            };
 
-            var UserProfile = await _db.UserProfiles.FirstOrDefaultAsync(up => up.UserId == user.Id);
-
-            return Ok(UserProfile);
+            return Ok(userDto);
         }
+
 
 
         [HttpGet("Get-User")]
