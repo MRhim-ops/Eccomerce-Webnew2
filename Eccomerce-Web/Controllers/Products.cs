@@ -22,7 +22,8 @@ namespace Eccomerce_Web.Controllers
         public async Task<IActionResult> AddProduct(ProductDto product)
         {
         
-  
+            
+            
             
 
             if (product == null)
