@@ -21,5 +21,7 @@ namespace Eccomerce_Web.Dtos
             ErrorMessage = "Password must contain uppercase, lowercase, number, and special character."
         )]
         public string Password { get; set; }
+
+        public string FullName { get; set; }
     }
 }

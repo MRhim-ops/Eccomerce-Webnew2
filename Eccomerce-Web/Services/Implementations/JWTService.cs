@@ -35,7 +35,7 @@ namespace Eccomerce_Web.Services.Implementations
                 new Claim(JwtRegisteredClaimNames.NameId, user.UserId.ToString()),
                 new Claim(JwtRegisteredClaimNames.Name, user.FullName),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email)
-            };
+            }; 
 
             var token = new JwtSecurityToken(
 
