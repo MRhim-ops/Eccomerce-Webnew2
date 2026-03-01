@@ -104,5 +104,73 @@ namespace Eccomerce_Web.Controllers
 
 
 
+        [HttpDelete("Cart-Product-Delete")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
+
+        public async Task<IActionResult> RemoveFromCart(int CartItemId)
+        {
+            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId))
+                return Unauthorized();
+            var cartItem = await _db.CartItems.FirstOrDefaultAsync(c => c.Id == CartItemId && c.UserId == userId);
+            if (cartItem == null)
+                return NotFound(new ApiResponse<bool>
+                {
+                    Data = false,
+                    Status = StatusCodes.Status404NotFound,
+                    Message = "Cart item not found"
+                });
+            _db.CartItems.Remove(cartItem);
+            await _db.SaveChangesAsync();
+            return Ok(new ApiResponse<bool>
+            {
+                Data = true,
+                Status = StatusCodes.Status200OK,
+                Message = "Successfully removed"
+            });
+        }
+
+    
+
+        
+
+
+    [HttpPut("Cart-Product-Update")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
+
+        public async Task<IActionResult> UpdateCartItem(int CartItemId, int Quantity)
+        {
+            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId))
+                return Unauthorized();
+            var cartItem = await _db.CartItems
+                .Include(c => c.Product)
+                .FirstOrDefaultAsync(c => c.Id == CartItemId && c.UserId == userId);
+            if (cartItem == null)
+                return NotFound(new ApiResponse<bool>
+                {
+                    Data = false,
+                    Status = StatusCodes.Status404NotFound,
+                    Message = "Cart item not found"
+                });
+            if (Quantity <= 0 || Quantity > cartItem.Product.Quantity)
+                return BadRequest(new ApiResponse<bool>
+                {
+                    Data = false,
+                    Status = StatusCodes.Status400BadRequest,
+                    Message = "Invalid quantity"
+                });
+            cartItem.Quantity = Quantity;                          //// not working update not found product error
+            await _db.SaveChangesAsync();
+
+            var updatedItem = await _db.CartItems
+                .Include(c => c.Product)
+                .FirstOrDefaultAsync(c => c.Id == CartItemId);
+            return Ok(new ApiResponse<CartItem>
+            {
+                Data = updatedItem,
+                Status = StatusCodes.Status200OK,
+                Message = "Cart item updated"
+            });
+        }
     }
+    
 }
