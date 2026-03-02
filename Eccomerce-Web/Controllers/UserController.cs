@@ -91,7 +91,7 @@ namespace Eccomerce_Web.Controllers
                 CartItems = user.CartItems.Select(c => new ForCartItems
                 {
                     SelectedQuantity = c.Quantity,
-                    
+                    CartItemIdInCart = c.Id,
                     Product = new ForProfileProductDto
                     {
                         Id = c.Product.Id,
@@ -117,6 +117,7 @@ namespace Eccomerce_Web.Controllers
 
                     Products = o.Products.Select(p => new ForCartItems
                     {
+                        
                         SelectedQuantity = p.Quantity,
                         Product = new ForProfileProductDto
                         {

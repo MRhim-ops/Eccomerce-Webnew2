@@ -71,7 +71,7 @@ namespace Eccomerce_Web.Controllers
 
                 return Ok(new ApiResponse<CartItem>
                 {
-                    Data = updatedItem,
+                    Data = null,
                     Status = StatusCodes.Status200OK,
                     Message = "Cart quantity updated"
                 });
@@ -94,7 +94,7 @@ namespace Eccomerce_Web.Controllers
 
             return Ok(new ApiResponse<CartItem>
             {
-                Data = addedItem,
+                Data = null,
                 Status = StatusCodes.Status200OK,
                 Message = "Successfully added"
             });
@@ -158,7 +158,7 @@ namespace Eccomerce_Web.Controllers
                     Status = StatusCodes.Status400BadRequest,
                     Message = "Invalid quantity"
                 });
-            cartItem.Quantity = Quantity;                          //// not working update not found product error
+            cartItem.Quantity = Quantity;                          //// working update also quantity check is working also
             await _db.SaveChangesAsync();
 
             var updatedItem = await _db.CartItems
@@ -166,7 +166,7 @@ namespace Eccomerce_Web.Controllers
                 .FirstOrDefaultAsync(c => c.Id == CartItemId);
             return Ok(new ApiResponse<CartItem>
             {
-                Data = updatedItem,
+                Data = null,
                 Status = StatusCodes.Status200OK,
                 Message = "Cart item updated"
             });
